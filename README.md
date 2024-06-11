@@ -24,7 +24,7 @@ Necesitaras una **NPU** o **tarjeta gráfica** para ejecutar este proyecto
 2. **Instalar las dependencias**
   - Abre una terminal en la raíz del proyecto y ejecutar ```pip install -r requirements.txt``` en la terminal para linux / Windows
 
-  [![Instalar dependencias (terminal)](assets/install-dependences.gif "Instalar dependencias (terminal)")](requirements.txt)
+  <!-- [![Instalar dependencias (terminal)](assets/install-dependences.gif "Instalar dependencias (terminal)")](requirements.txt) -->
 
   - Instala **Py Torch** para tu sistema, visita la [pagina oficial](https://pytorch.org/get-started/locally/)
   [![Instalar dependencias (pytorch)](assets/pytorch.png "Instalar dependencias (pytorch)")](https://pytorch.org/get-started/locally/)
@@ -33,8 +33,8 @@ Necesitaras una **NPU** o **tarjeta gráfica** para ejecutar este proyecto
 
 3. **Ejecutar** el archivo **principal** ```python custom_dataset.py``` puedes hacer doble click en el para ejecutarlo, hacerlo mediante la terminal abriendola en la raíz del proyecto o mediante visual studio code si tienes la **extension "python"** instalada
 
-[![Ejecutar archivo](assets/execute.png "Ejecutar archivo")](public/va.py)
-[![Ejecutar archivo desde visual studio code](assets/execute_fromvsc.png "Ejecutar archivo")](public/va.py)
+<!-- [![Ejecutar archivo](assets/execute.png "Ejecutar archivo")](public/va.py) -->
+<!-- [![Ejecutar archivo desde visual studio code](assets/execute_fromvsc.png "Ejecutar archivo")](public/va.py) -->
 
 Este proyecto fue ejecutado con el siguiente hardware:
 - Ryzen 7 5800H 3.20 GHz
