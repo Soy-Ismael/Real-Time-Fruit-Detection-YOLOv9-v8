@@ -1,0 +1,6 @@
+labelme
+labelme2yolo
+pyttsx3
+ultralytics
+opencv
+# torch
