@@ -1,6 +1,9 @@
-labelme
-labelme2yolo
+# labelme
+# labelme2yolo
 pyttsx3
 ultralytics
-opencv
+opencv-python
+Flask
+pillow
+flask_cors
 # torch
