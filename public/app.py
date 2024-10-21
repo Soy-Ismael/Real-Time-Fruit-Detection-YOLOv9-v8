@@ -27,7 +27,7 @@ def run_inference():
     config_confidence = float(request.form.get('confidence', 0))
 
     parent_path = os.path.dirname(os.path.abspath(__file__))
-    config_model = os.path.join(parent_path, 'runs', 'detect', 'train8', 'weights', 'best.pt') if config_model == "custom" else os.path.join(os.path.dirname(parent_path), 'models', f"{config_model}.pt")
+    config_model = os.path.join(parent_path, 'models', 'custom.pt') if config_model == "custom" else os.path.join(parent_path, 'models', f"{config_model}.pt")
 
     image = Image.open(BytesIO(image_file.read()))
     try:
