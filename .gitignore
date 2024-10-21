@@ -1,0 +1,31 @@
+__pycache__
+# dev/
+dev/fruits
+dev/data
+dev/runs
+public/data
+public/fruits
+public/runs
+_middle-old-main.py
+test-bing.py
+test-gpt.py
+test-perple.py
+# config.yaml
+config.json
+old-main.js
+old-styles.css
+old-index.html
+config.js
+original-main.py
+.vscode
+
+#* dev branch when push to dev
+# public
+
+#* public branch when push to production
+# dev
+# assets
+# yolov9c-seg.pt
+# yolov9c.pt
+
+# make a model folder
