@@ -4,9 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fruit Detection</title>
-    <!-- CSS -->
     <link rel="stylesheet" href="css/styles.css">
-    <!-- Favicon -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto:wght@300&display=swap" rel="stylesheet">
     <link rel="apple-touch-icon" sizes="57x57" href="../../assets/favicon/apple-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="../../assets/favicon/apple-icon-60x60.png">
     <link rel="apple-touch-icon" sizes="72x72" href="../../assets/favicon/apple-icon-72x72.png">
@@ -26,19 +27,12 @@
     <meta name="theme-color" content="#ffffff">
     <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#1b1b1b">
-    <!-- Fonts -->
-    <!-- <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&family=Roboto:wght@300&display=swap" rel="stylesheet"> -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Open+Sans&family=Roboto:wght@300&display=swap" rel="stylesheet">
 </head>
 <body>
     <header class="header">
         <nav class="nav">
+            <img src="../../assets/favicon/fruit-detection-logo3-removebg.png" alt="Logo" class="nav__logo">
             <h1 class="header__title">Fruit Detection</h1>
-            <!-- <i class="fa-solid fa-gear"></i> -->
             <svg xmlns="http://www.w3.org/2000/svg" id="configButton" style="fill: var(--font-color); width: 22px; cursor: pointer;"
                 viewBox="0 0 512 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
                 <path
@@ -47,6 +41,9 @@
         </nav>
     </header>
     <main class="main">
+        <div class="modal" data-good="" id="modal">
+            <h3 class="message_modal">Modal</h3>
+        </div>
         <aside class="config hide" id="configSide">
             <svg xmlns="http://www.w3.org/2000/svg" class="xsvg" id="exitConfigButton"
                 viewBox="0 0 384 512"><!--!Font Awesome Free 6.6.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2024 Fonticons, Inc.-->
@@ -68,21 +65,17 @@
                 </div>
                 <div class="field">
                     <label for="configGpu">Use the GPU</label>
-                    <input type="checkbox" name="gpu" id="configGpu" class="gpu__checkbox">
+                    <input type="checkbox" name="gpu" style="cursor: not-allowed;" id="configGpu" class="gpu__checkbox">
                 </div>
                 <div class="field">
-                    <!-- <label for="configConfidence">Confidence -->
                     <label for="configConfidence">Show only more than <span id="configConfidenceValue"></span> of confidence</label>
                     <input type="range" name="confidence" id="configConfidence" min="0" max="100">
                 </div>
-                <input type="submit" value="Guardar" class="config__submit">
             </form>
         </aside>
-        <!-- Fruit Input (with drag and drop) -->
         <section class="section">
             <div class="section__container">
                 <h3 class="section__title">Image Upload</h3>
-                <!-- <p class="section__description">Drag and drop a fruit image here</p> -->
             </div>
             <form class="section__form" id="fileForm">
                 <input type="file" name="image" id="imageInput" class="section__form__input">
@@ -94,16 +87,10 @@
                         <path
                             d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-128 0c-17.7 0-32-14.3-32-32L224 0 64 0zM256 0l0 128 128 0L256 0zM216 408c0 13.3-10.7 24-24 24s-24-10.7-24-24l0-102.1-31 31c-9.4 9.4-24.6 9.4-33.9 0s-9.4-24.6 0-33.9l72-72c9.4-9.4 24.6-9.4 33.9 0l72 72c9.4 9.4 9.4 24.6 0 33.9s-24.6 9.4-33.9 0l-31-31L216 408z" />
                     </svg>
-                    <!-- <svg xmlns="http://www.w3.org/2000/svg" class="check_svg_icon"
-                    viewBox="0 0 512 512">
-                        <path
-                            d="M256 512A256 256 0 1 0 256 0a256 256 0 1 0 0 512zM369 209L241 337c-9.4 9.4-24.6 9.4-33.9 0l-64-64c-9.4-9.4-9.4-24.6 0-33.9s24.6-9.4 33.9 0l47 47L335 175c9.4-9.4 24.6-9.4 33.9 0s9.4 24.6 0 33.9z" />
-                    </svg> -->
                     <p class="form__upload__text">Drag and drop an image or click to upload</p>
                 </div>
             </form>
         </section>
-        <!-- Sección para mostrar la imagen resultante y la imagen original -->
         <section class="section section__results">
             <div class="image__container">
                 <h3 class="section__title">Original Image</h3>
@@ -114,22 +101,7 @@
                 <img src="" alt="Processed Image" class="section__image" id="processedImage">
             </div>
         </section>
-        
-        <!-- Metrics box (for show how the use of cpu and ram increse while using this software with websocks) -->
-        <!-- <section class="section">
-            <div class="section__container">
-                <h2 class="section__title">System Metrics</h2>
-                <p class="section__description">Real-time monitoring</p>
-            </div>
-            <div class="metrics">
-                <div class="cpu__metrics"></div>
-                <span class="cpu__metrics__percent"></span>
-                <div class="cpu__metrics ram__metrics"></div>
-                <span class="cpu__metrics__percent ram__metrics__percent"></span>
-            </div>
-        </section> -->
     </main>
     <script src="js/main.js"></script>
-    <script src="js/config.js"></script>
 </body>
 </html>

@@ -1,9 +1,7 @@
-# model_path: "runs/detect/train4/weights/best.pt"
-model_path: "dev/runs/detect/train8/weights/best.pt"
-# model_path: "yolov9c.pt"
+# model_path: "dev/runs/detect/train8/weights/best.pt"
+model_path: "yolov9c.pt"
 camera_index: 0
 voice_index: 1
-# imgsize no funciona para inferencia en imagenes, toma el size de la imagen
 imgsz: 640
 gpu: true
 confidence_threshold: 0.60

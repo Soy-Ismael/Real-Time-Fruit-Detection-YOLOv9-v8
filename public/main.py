@@ -1,162 +1,135 @@
 from ultralytics import YOLO
 import cv2
-
-# * El modelo en carpeta train4 es el mejor que funciona hasta ahora
-#* YOLOV9C
-
-# Model	                Filenames   	                 Tasks         	    Inference    Validation      Training    	Export
-# YOLOv9	        yolov9c.pt yolov9e.pt	        Object Detection	        ✅      	    ✅      	    ✅	        ✅
-# YOLOv9-seg  	yolov9c-seg.pt yolov9e-seg.pt	  Instance Segmentation	        ✅	        ✅	        ✅	        ✅
-
-#* Colors
-RED = '\033[91m'
-GREEN = '\033[92m'
-BLUE = '\033[94m'
-CYAN = '\033[96m'
-MAGENTA = '\033[95m'
-YELLOW = '\033[93m'
-RESET = '\033[0m'
-
-# Leer modelo
-# Detección personalizada
-print(f'{YELLOW} = = PRESS ESC TO EXIT = = {RESET}')
-model = YOLO("runs/detect/train4/weights/best.pt")
-# model = YOLO("runs/segment/train/weights/best.pt")
-
-# Detecta muy bien, pero detecta todo
-# model = YOLO("yolov9c.pt")
-
-# print(model.info()) # Imprimir información del modelo.
-
-#* Ejemplo para predecir si el objeto para el que fue entrenado YOLO esta en una imagen
-# Run predictions
-# results = model.predict('C:/path/to/img')
-# Display results
-# results[0].show()
-
+from yaml import safe_load
 import pyttsx3
 
-engine = pyttsx3.init()
-voices = engine.getProperty('voices')
+class FruitDetector:
+    def __init__(self, config_path='dev/config.yaml'): # Change the path according to your project configuration (recommended absolute path)
+        with open(config_path, 'r') as file:
+            self.config = safe_load(file)
+        try:
+            self.model = YOLO(self.config['model_path']).to('cuda' if self.config['gpu'] else 'cpu')
+        except Exception:
+            self.model = YOLO(self.config['model_path']).to('cpu')
 
-# for voice in voices:
-#     print(f"ID: {voice.id}, Nombre: {voice.name}")
-engine.setProperty('voice', voices[1].id)
+        self.camera = cv2.VideoCapture(self.config['camera_index'])
+        self.engine = pyttsx3.init()
+        try:
+            self.engine.setProperty('voice', self.engine.getProperty('voices')[self.config['voice_index']].id)
+        except IndexError:
+            self.engine.setProperty('voice', self.engine.getProperty('voices')[0].id)
 
-def talk(text):
-    engine.say(text)
-    engine.runAndWait()
+        self.last_detections = set()
+        self.colors = {
+            'red' : '\033[91m',
+            'reset' : '\033[0m',
+        }
+        self.index = 0
 
-# talk('Hello, this is a test')
-
-
-def check_cuda_support():
-    import torch
-    # Comprobar si los nucleos CUDA de la GPU Nvidia estan habilitados para usar con la red neuronal
-    print('CUDA SUPPORT: ✅') if torch.cuda.is_available() else print('CUDA SUPPORT: ❌, VISIT https://pytorch.org/get-started/locally/')
-
-
-def train_model(model_name:str='yolov9m.pt', data:str='data/dataset.yaml', epochs:int=300, batch:int=4):
-    global model, result
-    model = YOLO(model_name)  # Cargar un modelo preentrenado
-
-    # Entrenar el modelo
-    result = model.train(data=data, epochs=epochs, imgsz=640, batch=batch)
-
-
-def get_boxes():
-    # print(model.names)
-    index=0
-    for item in model.names.items():
-        print(f'{item[0]} {item[1]}')
-
-
-def custom_dataset(boxes):
-    for box in boxes:
-        match box.cls:
-            case 0:
-                talk('There is an apple in front of you')
-            case 1:
-                talk('There is a banana in front of you')
-            case 2:
-                talk('There is a green apple in front of you')
-            case 3:
-                talk('There is an orange in front of you')    
-            case _:
-                pass
-
-
-
-def default_dataset(boxes, more_than_fruits=False):
-    for box in boxes:
-        match box.cls:
-            case 47:
-                talk('There is an apple in front of you')
-            case 46:
-                talk('There is a banana in front of you')
-            case 51:
-                talk('There is a carrot in front of you')
-            case 49:
-                talk('There is an orange in front of you')
-            case 50:
-                talk('There is a brocoli in front of you')
-            case 40:
-                talk('There is a wine glass in front of you')
-            case _:
-                pass
-
-        if more_than_fruits:
-            match box.cls:
-                case 67:
-                    talk('There is a cell phone in front of you')
-                case 64:
-                    talk('There is a mouse in front of you')
-                case 42:
-                    talk('There is a fork in front of you')
-                case 0:
-                    talk('There is a person in front of you')
-                case _:
-                    pass
-
-
-
-# Realizar video captura
-cap = cv2.VideoCapture(0) # Indice de la camara (por si tienes más de una)
-def run():
-    while True:
-        # Leer fotogramas
-        ret, frame = cap.read()
-
-        # Leermos resultados
-        # Toma el video de la camara, redimencionalo a 640px y muestrame las predicciones que supere el 80% de concidencia
-        result = model.predict(frame, imgsz = 640, conf = 0.5)
-        # result = model.predict(frame, imgsz = 640)
-
-        #* Ejemplo para analizar inferencia de una imagen
-        # Run inference with the YOLOv9c model on the 'bus.jpg' image
-        # results = model('path/to/bus.jpg')
-
-        # Mostramos resultados
-        detection = result[0].plot()
-        cv2.imshow("DETECTION", detection)
-
-        #* My dataset
-        # custom_dataset(result[0].boxes)
-
-        # *YOLO COCO DATASET
-        # Verificar si se detectó una fruta específica
-        # print(f'{RED} Se encontraron ' + str(len(result[0].boxes)) +' cajas' + RESET)
-        # default_dataset(result[0].boxes)
+    def check_available_voices(self):
+        index = 0
+        for voice in self.engine.getProperty('voices'):
+            print(f"Voice Index: {index}, Name: {voice.id.split('\\')[-1]}, Language: {voice.name.split('-')[-1]}")
+            print(f'{self.colors['red']} = = = = = = = =  = = = = = = {self.colors['reset']}')
+            index = index + 1
         
-        # Mostrar fotogramas
-        # cv2.imshow("DETECCION Y SEGMENTACION", frame)
-        # Ya no mostraremos frame, si no detection (aquí si busca el objeto con el que el modelo se entreno)
+    def talk(self, text):
+        with ThreadPoolExecutor(max_workers=2) as executor:
+            executor.submit(self._talk_async, text)
 
-        # Cerrar programa
-        if cv2.waitKey(1) == 27:
-            break
+    def _talk_async(self, text):
+        self.engine.say(text)
+        self.engine.runAndWait()
 
-run()
-# get_boxes()
-cap.release()
-cv2.destroyAllWindows()
+    def detect(self, frame):
+        results = self.model.predict(frame, imgsz=self.config['imgsz'], conf=self.config['confidence_threshold'])
+        current_detections = set()
+        for result in results:
+            for box in result.boxes:
+                class_id = int(box.cls)
+                if class_id in self.config['class_names']:
+                    item_name = self.config['class_names'][class_id]
+                    current_detections.add(item_name)
+
+        new_detections = current_detections - self.last_detections
+        for item in new_detections:
+            self.talk(f"There is {item} in front of you")
+
+        self.last_detections = current_detections
+        return results[0].plot()
+    
+    def get_model_info(self, model):
+        info = {
+            "Model type": type(model),
+            "Task": model.task,
+            "Number of parameters": sum(p.numel() for p in model.model.parameters()),
+            "Class names": model.names,
+            "Input size": model.model.args['imgsz'],
+            "YOLO version": model._version,
+            "Weights file": model.ckpt_path,
+            "Device": model.device,
+        }
+        return info
+
+    def inference(self, img, model=None, confidence=None, gpu=None, local=True, save_image_debug_path=None):
+        model = model if model != None else self.config['model_path']
+        confidence = confidence if confidence != None else self.config['confidence_threshold']
+        gpu = gpu if gpu != None else self.config['gpu']
+
+        local_model = YOLO(model).to('cuda' if gpu else 'cpu')
+
+        result = local_model.predict(img, conf=confidence)
+        if save_image_debug_path != None:
+            result[0].save(f"{save_image_debug_path[:-1] if save_image_debug_path.endswith('/') else save_image_debug_path}/debug_image{self.index}.png")
+
+        self.index = self.index +1
+        if local:
+            result[0].show()
+        else:
+            return {'image': result[0].plot(), 'json': result[0].tojson()}
+
+    def run(self):
+        try:
+            while True:
+                ret, frame = self.camera.read()
+
+                if not ret:
+                    break
+
+                detection = self.detect(frame)
+                cv2.imshow("DETECTION | Press ESC to exit", detection)
+
+                if cv2.waitKey(1) == 27:  # ESC key, (if press esc the detection going to end)
+                    break
+
+        finally:
+            self.camera.release()
+            cv2.destroyAllWindows()
+
+    def check_cuda_support(self):
+        import torch
+        import torchvision
+
+        print(f"{self.colors['red']}CUDA SUPPORT:{self.colors['reset']} {'✅' if torch.cuda.is_available() else '❌, VISIT https://pytorch.org/get-started/locally/'}")
+        print(f"{self.colors['red']}Device:{self.colors['reset']} {torch.cuda.get_device_name(0)}")
+
+        print(f"{self.colors['red']}Model are using:{self.colors['reset']} {self.model.device}")
+        print(f"{self.colors['red']}PyTorch version:{self.colors['reset']} {torch.__version__}")
+        print(f"{self.colors['red']}Torchvision version:{self.colors['reset']} {torchvision.__version__}")
+        print(f"{self.colors['red']}CUDA available:{self.colors['reset']} {torch.cuda.is_available()}")
+        print(f"{self.colors['red']}CUDA version:{self.colors['reset']} {torch.version.cuda}")
+
+    def train_model(self, model_name:str='yolov9m.pt', data:str='data/dataset.yaml', epochs:int=300, imgsz:int=640, batch:int=4):
+        global model, result
+        model = YOLO(model_name)
+        result = model.train(data=data, epochs=epochs, imgsz=imgsz, batch=batch)
+
+    def get_boxes(self):
+        for item in model.names.items():
+            print(f'{item[0]} {item[1]}')
+
+
+if __name__ == "__main__":
+    detector = FruitDetector()
+    # detector.run()
+    # detector.inference('public/images/oranges2.jpg')
